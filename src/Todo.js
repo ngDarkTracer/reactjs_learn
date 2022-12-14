@@ -1,12 +1,37 @@
-import {useState} from "react";
+import {useState, useEffect} from "react";
 
 import {Card} from 'primereact/card'
 import {Button} from 'primereact/button'
-import {MultiStateCheckbox} from 'primereact/multistatecheckbox';
+import {ToggleButton} from 'primereact/togglebutton';
 
 function Todo(props) {
 
-    const [value, setValue] = useState(null);
+    const [status, setStatus] = useState(props.status);
+    const [time, setTime] = useState(0);
+    const [clicked, setClicked] = useState(false);
+
+    let i = 0;
+
+    useEffect(() => {
+        let interval = null;
+        if (clicked) {
+            interval = setInterval(() => {
+                i++
+                if (i === 10) {
+                    props.onChecked(props.id)
+                    clearInterval(interval);
+                }
+            }, 1000);
+        } else {
+            i = 0
+            clearInterval(interval);
+        }
+        return () => {
+            i = 0;
+            clearInterval(interval);
+        };
+    });
+
     const options = [
         { value: 'Done', icon: 'pi pi-check' },
         { value: 'Not done', icon: 'pi pi-ellipsis-h' }
@@ -17,18 +42,18 @@ function Todo(props) {
         <Button label="Update" className="p-button-raised p-button-rounded p-button-primary" onClick={() => props.onUpdateElement(props)} />
     </span>
 
-    const header = <span>
-
-    </span>
+    const updateStatus = () => {
+        setClicked(!clicked)
+        setStatus(!status);
+    }
 
     return (
         <div style={{margin: '15px', width: '35%'}}>
             <Card title={props.title} footer={footer}>
                 <div>
                     <span>
-                        <MultiStateCheckbox value={value} options={options} onChange={(e) => setValue(e.value)} optionValue="value" />
+                        <ToggleButton className="p-button-warning" onLabel="Done" offLabel="Not done" onIcon="pi pi-check" offIcon="pi pi-times" checked={status} onChange={() => updateStatus()}/>
                     </span>
-                    <span style={{marginLeft: '5px'}}>{value}</span>
                 </div>
             </Card>
         </div>
